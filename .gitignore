@@ -105,4 +105,4 @@ venv.bak/
 
 # ml-models
 datasets/*
-datasets/.gitkeep
+!datasets/.gitkeep
