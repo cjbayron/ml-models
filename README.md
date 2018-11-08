@@ -2,6 +2,9 @@
 
 Machine learning demonstration on various datasets
 
+## Implementations
+* [svm-multi-classifier.py](svm-multi-classifier.py) - Using SVM for Multi-class classification + Visualization with PCA and t-SNE
+
 ## Authors
 
 * **Christopher John Bayron**
