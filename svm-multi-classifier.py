@@ -10,8 +10,8 @@ from sklearn.metrics import classification_report
 
 # get data from:
 #   https://www.kaggle.com/c/otto-group-product-classification-challenge
-trn_data_path = 'otto-group-product-classification/train.csv'
-tst_data_path = 'otto-group-product-classification/test.csv'
+trn_data_path = 'datasets/otto-group-product-classification/train.csv'
+tst_data_path = 'datasets/otto-group-product-classification/test.csv'
 
 showHist = False
 showHeatmap = False
