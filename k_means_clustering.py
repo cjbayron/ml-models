@@ -1,54 +1,25 @@
-# K-means
+'''
+K-means Clustering (from scratch) with elbow method selection
+'''
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn import preprocessing
-from sklearn.manifold import TSNE
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import StratifiedKFold
 from scipy.spatial.distance import euclidean
+
+import common.utils as ut
 
 # get data from:
 #   https://www.kaggle.com/c/otto-group-product-classification-challenge
-trn_data_path = 'datasets/otto-group-product-classification/train.csv'
-num_samples = 2000
-color_pool = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet',
+TRN_DATA_PATH = 'datasets/otto-group-product-classification/train.csv'
+NUM_SAMPLES = 2000
+COLOR_POOL = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet',
               'brown', 'gold', 'black', 'pink', 'tan', 'lime', 'magenta',
               'teal', 'lavender', 'khaki', 'aqua', 'fuchsia', 'ivory']
 
-def get_data_from_csv(data_path):
-    data = pd.read_csv(data_path)
-    feats = data.drop('target', axis=1).drop('id', axis=1).astype(np.int)
-    # feature scaling
-    feats = pd.DataFrame(preprocessing.scale(feats))
-    labels = data['target'].map(lambda s : s.lstrip('Class_')).astype(np.int)
-
-    return feats, labels
-
-def sample(feats, labels, num_samples):
-    splits = int(len(feats) / num_samples)
-    sampler = StratifiedKFold(n_splits=splits, shuffle=True)
-    for _, sampled_idxs in sampler.split(feats, labels):
-        feats, labels = feats.iloc[sampled_idxs], labels.iloc[sampled_idxs]
-        break
-
-    return feats, labels
-
-def reduce_to_2D_by_tsne(df):
-    print("Reducing dimension by t-SNE...")
-    tsne_g = TSNE(n_components=2, perplexity=40, n_iter=300)
-    tsne_res = tsne_g.fit_transform(df.values)
-    print("Done.")
-    # "compressed" data
-    comp_data = pd.DataFrame()
-    comp_data['pc1'] = tsne_res[:,0]
-    comp_data['pc2'] = tsne_res[:,1]
-
-    return comp_data
-
 def visualize_data(feats, labels, ca):
+    '''Display labeled data and clustered data
+    '''
     print("Visualizing data...")
-    red_feats = reduce_to_2D_by_tsne(feats)
+    red_feats = ut.reduce_to_2D_by_tsne(feats)
 
     label2col_map = ['red', 'orange', 'yellow', 'green', 'blue',
                      'violet', 'brown', 'gray', 'pink']
@@ -59,7 +30,7 @@ def visualize_data(feats, labels, ca):
     fig, ax = plt.subplots(ncols=2, figsize=(10, 5))
     for label in label_list:
         # get samples with label == label
-        idxs = np.where(labels==label)
+        idxs = np.where(labels == label)
         # get components
         pc1, pc2 = red_feats['pc1'].values[idxs], red_feats['pc2'].values[idxs]
         # scatter plot w/ color based on labels
@@ -72,11 +43,11 @@ def visualize_data(feats, labels, ca):
 
     for i, cluster in enumerate(cluster_list):
         # get samples assigned to cluster
-        idxs = np.where(ca==cluster)
+        idxs = np.where(ca == cluster)
         # get components
         pc1, pc2 = red_feats['pc1'].values[idxs], red_feats['pc2'].values[idxs]
         # scatter plot w/ color based on cluster
-        ax[1].scatter(x=pc1, y=pc2, color=color_pool[i],
+        ax[1].scatter(x=pc1, y=pc2, color=COLOR_POOL[i],
                       alpha=0.5, label=cluster)
 
     ax[1].set_xlabel('PC1')
@@ -110,11 +81,10 @@ def k_means(k, X, max_iter=100, print_every_iter=5):
     if k > len(X):
         raise Exception("No. of clusters > no. of samples!")
     # randomly initialize means
-    u_idxs = np.random.choice(range(len(X)), size=k, replace=True)
-    U = X[u_idxs]
+    U = X[np.random.choice(range(len(X)), size=k, replace=True)]
     # initialize cluster array
     c = np.array([-1] * len(X))
-    
+
     for j in range(max_iter):
         U_prev = np.array(U)
         # cluster assignment
@@ -126,11 +96,10 @@ def k_means(k, X, max_iter=100, print_every_iter=5):
         # update means
         cost = 0
         for k_idx in range(k):
-            c_xs = X[np.where(c==k_idx)]
+            c_xs = X[np.where(c == k_idx)]
             if len(c_xs) == 0:
                 # re-initialize mean/cluster
-                idx = np.random.choice(range(len(X)))
-                U[k_idx] = X[idx]
+                U[k_idx] = X[np.random.choice(range(len(X)))]
             else:
                 U[k_idx] = np.mean(c_xs)
 
@@ -143,10 +112,12 @@ def k_means(k, X, max_iter=100, print_every_iter=5):
         # if no update, then minima is already found
         if np.array_equal(U, U_prev):
             break
-    
+
     return c, cost
 
 def show_elbow(K, costs):
+    '''Graph "elbow" for selection of k
+    '''
     plt.subplots(figsize=(8, 5))
     plt.plot(K, costs, 'o-')
     plt.xticks(K)
@@ -157,12 +128,14 @@ def show_elbow(K, costs):
     plt.show()
 
 def main():
-    feats, labels = get_data_from_csv(trn_data_path)
+    '''Main
+    '''
+    feats, labels = ut.get_data_from_csv(TRN_DATA_PATH)
 
-    if num_samples < len(feats):
-        feats, labels = sample(feats, labels, num_samples)
+    if NUM_SAMPLES < len(feats):
+        feats, labels = ut.sample(feats, labels, NUM_SAMPLES)
 
-    tries = 3
+    tries = 5
     min_k = 3
     max_k = 12
 
@@ -197,7 +170,7 @@ def main():
             raise ValueError
     except ValueError:
         print('Invalid k given!')
-        return 0
+        return 1
 
     idx = K.index(selected_k)
     ca = K_ca[idx]
@@ -205,6 +178,7 @@ def main():
 
     # visualize results
     visualize_data(feats, labels, ca)
+    return 0
 
 if __name__ == "__main__":
     main()
