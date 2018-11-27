@@ -69,6 +69,7 @@ def calculate_cost(X, u):
     '''
     cost = 0
     cost += np.sum([(euclidean(x, u)**2) for x in X])
+
     return cost
 
 def k_means(k, X, max_iter=100, print_every_iter=5):
@@ -106,8 +107,9 @@ def k_means(k, X, max_iter=100, print_every_iter=5):
             # get cost
             cost += calculate_cost(c_xs, U[k_idx])
 
+        cost /= len(X)
         if (j+1) % print_every_iter == 0:
-            print("k = %d. Iter %d. Cost: %.2f" % (k, j+1, cost))
+            print("k = %d. Iter %d. Cost: %.6f" % (k, j+1, cost))
 
         # if no update, then minima is already found
         if np.array_equal(U, U_prev):
@@ -174,7 +176,7 @@ def main():
 
     idx = K.index(selected_k)
     ca = K_ca[idx]
-    print("Selected k: %d. Final Cost: %.2f" % (selected_k, K_costs[idx]))
+    print("Selected k: %d. Final Cost: %.6f" % (selected_k, K_costs[idx]))
 
     # visualize results
     visualize_data(feats, labels, ca)
