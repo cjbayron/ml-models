@@ -9,13 +9,16 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.model_selection import StratifiedKFold
 
-def get_data_from_csv(data_path):
+def get_data_from_csv(data_path, rescale=True):
     '''Read data from CSV file and perform feature scaling
     '''
     data = pd.read_csv(data_path)
     feats = data.drop('target', axis=1).drop('id', axis=1).astype(np.int)
-    # feature scaling
-    feats = pd.DataFrame(preprocessing.scale(feats))
+    if rescale is True:
+        # feature scaling
+        feats = preprocessing.scale(feats)
+
+    feats = pd.DataFrame(feats)
     labels = data['target'].map(lambda s: s.lstrip('Class_')).astype(np.int)
 
     return feats, labels
