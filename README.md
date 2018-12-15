@@ -2,6 +2,10 @@
 
 Machine learning demonstration on various datasets
 
+## Implementations
+* [svm_multi_classifier.py](svm_multi_classifier.py) - Using SVM for Multi-class classification + Visualization with PCA and t-SNE
+* [k_means_clustering.py](k_means_clustering.py) - K-means Clustering (from scratch) with elbow method selection
+
 ## Authors
 
 * **Christopher John Bayron**
